@@ -130,6 +130,14 @@ func (w *EmailWorker) processMessage(ctx context.Context, d amqp.Delivery) {
 		json.Unmarshal(b, &testData)
 
 		sendErr = w.emailService.SendMailToStudent(sendCtx, testData.RecipientEmail,testData.UserName, testData.TestPaperTitle, testData.MarksObtained, testData.FeedbackURL)
+	
+	case models.EmailTypeGeneral:
+		// Decode the inner GeneralData struct
+		var generalData models.GeneralEmail
+		b, _ := json.Marshal(job.Data)
+		json.Unmarshal(b, &generalData)
+
+		sendErr = w.emailService.GeneralMailSend(sendCtx, generalData.RecipientEmail, generalData.Subject, generalData.Body)
 
 	default:
 		w.logger.Warnf("Unknown email job type: %s", job.Type)
