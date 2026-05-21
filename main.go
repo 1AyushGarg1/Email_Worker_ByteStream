@@ -147,8 +147,8 @@ func (w *EmailWorker) processMessage(ctx context.Context, d amqp.Delivery) {
 
 	if sendErr != nil {
 		w.logger.Errorf("Failed to send %s email: %v", job.Type, sendErr)
-		// Nack and requeue so another worker (or this one) can try again later
-		d.Nack(false, true)
+		// Nack without requeueing to discard the message
+		d.Nack(false, false)
 	} else {
 		w.logger.Infof("Successfully processed %s email.", job.Type)
 		// Success! Acknowledge the message so RabbitMQ removes it from the queue
